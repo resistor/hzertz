@@ -1,5 +1,13 @@
 module Zertz where
 
+-- Zertz Module
+-- This module defines the basic data types used for representing a game of
+-- Zertz.  This includes representing the board, player scores, hexes, etc.
+-- Also includes are functions for manipulating the game state.
+
+--------------------------------------------------------------------------------
+-- Data definitions
+--------------------------------------------------------------------------------
 import qualified Data.Map as Map
 
 data HexState = Empty | Open | White | Gray | Black
@@ -13,14 +21,22 @@ type Score = (Int, Int, Int)
 data ZertzState = ZertzState Score Score ZertzBoard Int
   deriving (Eq, Show)
 
+  --------------------------------------------------------------------------------
+-- Data accessors
+--------------------------------------------------------------------------------
+
+-- getHex - Fetch the state of a given coordinate
 getHex :: Coord -> ZertzBoard -> HexState
 getHex = Map.findWithDefault Empty
 
+-- blankBoard - The default board with no marbles
 blankBoard :: ZertzBoard
 blankBoard = Map.fromList [((0,0), Open), ((1,0), Open), ((2,0), Open),
                            ((0,-1), Open), ((1,-1), Open), ((1,1), Open),
                            ((2,1), Open)]
 
+-- *Hex - Generate to the coordinate pair in the given direction from the 
+-- given coordinate pair.
 nwHex :: Coord -> Coord
 nwHex (x, y) = (x, y-1)
 neHex :: Coord -> Coord

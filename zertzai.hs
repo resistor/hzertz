@@ -1,4 +1,4 @@
-module ZertzAI(ZertzState) where
+module ZertzAI(ZertzState(..)) where
 
 import Zertz
 import qualified Data.List as List
