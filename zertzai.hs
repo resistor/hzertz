@@ -75,7 +75,6 @@ generateJumps state
 
 -- generatePlacemetns - Given a starting state, generate all states that are
 -- accessible through placing a marble and removing a disk.
--- FIXME: Implement disk-removal.
 generatePlacements :: ZertzState -> [ZertzState]
 generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
