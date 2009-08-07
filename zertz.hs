@@ -35,7 +35,7 @@ blankBoard = Map.fromList [((0,0), Open), ((1,0), Open), ((2,0), Open),
                            ((0,-1), Open), ((1,-1), Open), ((1,1), Open),
                            ((2,1), Open)]
 
--- *Hex - Generate to the coordinate pair in the given direction from the 
+-- *Hex - Generate to the coordinate pair in the given direction from the
 -- given coordinate pair.
 nwHex :: Coord -> Coord
 nwHex (x, y) = (x, y-1)
@@ -61,10 +61,10 @@ hexOpen :: ZertzBoard -> Coord -> Bool
 hexOpen board coords =
   case getHex coords board of
     Open -> True
-    _ -> False 
+    _ -> False
 
 moveMarble :: Coord -> Coord -> ZertzBoard -> ZertzBoard
-moveMarble oldCoords newCoords board = 
+moveMarble oldCoords newCoords board =
   placeMarble newCoords color newBoard
     where
       color = getHex oldCoords board
