@@ -1,6 +1,7 @@
 module ZertzAI(ZertzState(..)) where
 
 import Zertz
+import Control.Monad
 import qualified Data.List as List
 import qualified Data.Map as Map
 import qualified MiniMax as MiniMax
@@ -11,8 +12,9 @@ instance MiniMax.WorldState ZertzState where
   -- generateMoves - If there are jumps available, we must take one.  Otherwise,
   -- we perform a placement.
   generateMoves state 
-    | null $ generateJumps state = generatePlacements state
-    | otherwise                  = generateJumps state
+    | (generateJumps state) == [state] = map invert $ generatePlacements state
+    | otherwise                        = map invert $ generateJumps state
+    where invert (ZertzState s1 s2 b p) = ZertzState s1 s2 b (-p)
 
   -- isTerminal - The game state is terminal if either player has a winning
   -- score set.
@@ -68,10 +70,10 @@ successorJumps ws@(ZertzState s1 s2 b p) = do
 -- generateJumps - Given a starting state, generate the leaf states of the jump
 -- tree inductively defined by successorJumps.
 generateJumps :: ZertzState -> [ZertzState]
-generateJumps state
+generateJumps state@(ZertzState s1 s2 b p)
    | null children = [state]
    | otherwise     = concatMap generateJumps children
-   where children  = successorJumps state
+   where children  = filter (/= state) $ successorJumps state
 
 -- generatePlacemetns - Given a starting state, generate all states that are
 -- accessible through placing a marble and removing a disk.
@@ -79,8 +81,10 @@ generatePlacements :: ZertzState -> [ZertzState]
 generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
+    guard $ coord /= remCoord
     color <- [White, Gray, Black]
-    return $ ZertzState s1 s2 (placeMarble coord color b) p
+    return $
+      ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
     openHexes = Map.keys $ Map.filter (== Open) b
 

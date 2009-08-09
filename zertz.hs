@@ -11,7 +11,7 @@ module Zertz where
 import qualified Data.Map as Map
 
 data HexState = Empty | Open | White | Gray | Black
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
 type Coord = (Int, Int)
 type ZertzBoard = Map.Map Coord HexState
@@ -19,7 +19,7 @@ type ZertzBoard = Map.Map Coord HexState
 type Score = (Int, Int, Int)
 
 data ZertzState = ZertzState Score Score ZertzBoard Int
-  deriving (Eq, Show)
+  deriving (Eq, Show, Read)
 
   --------------------------------------------------------------------------------
 -- Data accessors
@@ -31,24 +31,30 @@ getHex = Map.findWithDefault Empty
 
 -- blankBoard - The default board with no marbles
 blankBoard :: ZertzBoard
-blankBoard = Map.fromList [((0,0), Open), ((1,0), Open), ((2,0), Open),
-                           ((0,-1), Open), ((1,-1), Open), ((1,1), Open),
-                           ((2,1), Open)]
+blankBoard = Map.fromList $ map (\x -> (x, Open))
+               [      (4,0),(4,1),(4,2),
+                   (3,0),(3,1),(3,2),(3,3),
+                (2,0),(2,1),(2,2),(2,3),(2,4),
+                   (1,1),(1,2),(1,3),(1,4),
+                      (0,2),(0,3),(0,4)       ]
+
+startState :: ZertzState
+startState = ZertzState (0,0,0) (0,0,0) blankBoard (-1)
 
 -- *Hex - Generate to the coordinate pair in the given direction from the
 -- given coordinate pair.
 nwHex :: Coord -> Coord
-nwHex (x, y) = (x, y-1)
+nwHex (x, y) = (x+1, y-1)
 neHex :: Coord -> Coord
 neHex (x, y) = (x+1, y)
 eHex :: Coord -> Coord
-eHex (x, y) = (x+1, y+1)
+eHex (x, y) = (x, y+1)
 seHex :: Coord -> Coord
-seHex (x, y) = (x, y+1)
+seHex (x, y) = (x-1, y+1)
 swHex :: Coord -> Coord
 swHex (x, y) = (x-1, y)
 wHex :: Coord -> Coord
-wHex (x, y) = (x-1, y-1)
+wHex (x, y) = (x, y-1)
 
 hexOccupied :: ZertzBoard -> Coord -> Bool
 hexOccupied board coords =
@@ -68,7 +74,7 @@ moveMarble oldCoords newCoords board =
   placeMarble newCoords color newBoard
     where
       color = getHex oldCoords board
-      newBoard = removeMarble oldCoords board
+      newBoard = placeMarble oldCoords Open board
 
 placeMarble :: Coord -> HexState -> ZertzBoard -> ZertzBoard
 placeMarble = Map.insert
@@ -77,7 +83,7 @@ removeMarble :: Coord -> ZertzBoard -> ZertzBoard
 removeMarble = Map.delete
 
 jumpMarble :: Coord -> Coord -> Coord -> ZertzBoard -> ZertzBoard
-jumpMarble s m e = moveMarble s e . removeMarble m
+jumpMarble s m e = moveMarble s e . placeMarble m Open
 
 scoreMarble :: Score -> HexState -> Score
 scoreMarble (x, y, z) White = (x+1, y, z)
