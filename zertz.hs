@@ -76,6 +76,17 @@ moveMarble oldCoords newCoords board =
       color = getHex oldCoords board
       newBoard = placeMarble oldCoords Open board
 
+marblesAvailable :: ZertzState -> HexState -> Int
+marblesAvailable (ZertzState (w1,_,_) (w2,_,_) b _) White =
+  let numOnBoard = Map.size $ Map.filter (== White) b in
+    5 - numOnBoard - w1 - w2
+marblesAvailable (ZertzState (_,g1,_) (_,g2,_) b _) Gray =
+  let numOnBoard = Map.size $ Map.filter (== Gray) b in
+    7 - numOnBoard - g1 - g2
+marblesAvailable (ZertzState (_,_,b1) (_,_,b2) b _) Black =
+  let numOnBoard = Map.size $ Map.filter (== Black) b in
+    7 - numOnBoard - b1 - b2
+
 placeMarble :: Coord -> HexState -> ZertzBoard -> ZertzBoard
 placeMarble = Map.insert
 

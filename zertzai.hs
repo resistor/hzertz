@@ -79,10 +79,10 @@ generateJumps state@(ZertzState s1 s2 b p)
 -- accessible through placing a marble and removing a disk.
 generatePlacements :: ZertzState -> [ZertzState]
 generatePlacements s@(ZertzState s1 s2 b p) = do
+    color <- filter (\c -> (marblesAvailable s c) > 0) [White, Gray, Black]
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
     guard $ coord /= remCoord
-    color <- [White, Gray, Black]
     return $
       ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
