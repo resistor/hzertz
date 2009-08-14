@@ -4,6 +4,7 @@ import Zertz
 import Control.Monad
 import qualified Data.List as List
 import qualified Data.Map as Map
+import qualified Data.Graph as Graph
 import qualified MiniMax as MiniMax
 
 -- Provide instance implementations to make ZertzState valid input
@@ -104,4 +105,14 @@ removable (ZertzState _ _ b _) c =
     hexList = cycle [neHex, eHex, seHex, swHex, wHex, nwHex]
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
-  
+
+boardTograph :: ZertzBoard -> (Graph.Graph,
+                               Graph.Vertex -> (Coord, Coord, [Coord]),
+                               Coord -> Maybe Graph.Vertex)
+boardTograph b =
+  Graph.graphFromEdges graph_list
+  where
+    not_empty = Map.keys $ Map.filter (/= Empty) b
+    neighbors x = filter (hexOpen b) $ map (\f -> f x)
+                    [neHex, eHex, seHex, swHex, wHex, nwHex]
+    graph_list = map (\x -> (x, x, neighbors x)) not_empty
