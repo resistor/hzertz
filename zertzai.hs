@@ -106,6 +106,7 @@ removable (ZertzState _ _ b _) c =
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
 
+eliminateMinComponent :: ZertzState -> ZertzState
 eliminateMinComponent s@(ZertzState _ _ b _) =
   foldr (fold_remove) s min_component
   where
