@@ -106,11 +106,9 @@ removable (ZertzState _ _ b _) c =
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
 
-boardTograph :: ZertzBoard -> (Graph.Graph,
-                               Graph.Vertex -> (Coord, Coord, [Coord]),
-                               Coord -> Maybe Graph.Vertex)
-boardTograph b =
-  Graph.graphFromEdges graph_list
+boardComponents :: ZertzBoard -> [[Coord]]
+boardComponents b =
+  map Graph.flattenSCC $ Graph.stronglyConnComp graph_list
   where
     not_empty = Map.keys $ Map.filter (/= Empty) b
     neighbors x = filter (hexOpen b) $ map (\f -> f x)
