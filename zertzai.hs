@@ -84,7 +84,7 @@ generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
     guard $ coord /= remCoord
-    return $
+    return $ eliminateMinComponent $ 
       ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
     openHexes = Map.keys $ Map.filter (== Open) b
@@ -105,6 +105,25 @@ removable (ZertzState _ _ b _) c =
     hexList = cycle [neHex, eHex, seHex, swHex, wHex, nwHex]
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
+
+eliminateMinComponent s@(ZertzState _ _ b _) =
+  foldr (fold_remove) s min_component
+  where
+    components = boardComponents b
+    minList x y 
+      | length x > length y = y
+      | otherwise = x
+    min_component = 
+      if (length components) == 1
+        then []
+        else foldr1 minList components
+    fold_remove cd (ZertzState s1 s2 b' p) =
+      let color = getHex cd b
+          new_board = removeMarble cd b' in
+        case (color, p) of
+          (Open, _) -> ZertzState s1 s2 new_board p
+          (_, 1)    -> ZertzState (scoreMarble s1 color) s2 new_board p
+          (_, (-1)) -> ZertzState s1 (scoreMarble s2 color) new_board p
 
 boardComponents :: ZertzBoard -> [[Coord]]
 boardComponents b =
