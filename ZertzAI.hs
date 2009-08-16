@@ -85,8 +85,8 @@ generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
     guard $ coord /= remCoord
---    eliminateFilledComponents $ 
-    return $ ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
+    eliminateFilledComponents $ 
+      ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
     openHexes = Map.keys $ Map.filter (== Open) b
 
