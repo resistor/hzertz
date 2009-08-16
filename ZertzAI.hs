@@ -5,6 +5,7 @@ import Control.Monad
 import qualified Data.List as List
 import qualified Data.Map as Map
 import qualified Data.Graph as Graph
+import qualified Data.Set as Set
 import qualified MiniMax as MiniMax
 
 -- Provide instance implementations to make ZertzState valid input
@@ -84,8 +85,8 @@ generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
     guard $ coord /= remCoord
-    return $ eliminateMinComponent $ 
-      ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
+--    eliminateFilledComponents $ 
+    return $ ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
     openHexes = Map.keys $ Map.filter (== Open) b
 
@@ -96,7 +97,7 @@ removable (ZertzState _ _ b _) c =
     2    -> True
     3    -> True
     4    ->
-      let offsetLists = map (\x -> drop x empties) [0..5]
+      let offsetLists = map (flip drop empties) [0..5]
           matches = 
             map (/= [True, True, True, False, True, False]) offsetLists in
         all (id) matches
@@ -106,31 +107,27 @@ removable (ZertzState _ _ b _) c =
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
 
-eliminateMinComponent :: ZertzState -> ZertzState
-eliminateMinComponent s@(ZertzState _ _ b _) =
-  foldr (fold_remove) s min_component
+eliminateFilledComponents :: ZertzState -> [ZertzState]
+eliminateFilledComponents s@(ZertzState _ _ b _) =
+  map (foldr (fold_remove) s) capChoices
   where
-    components = boardComponents b
-    minList x y 
-      | length x > length y = y
-      | otherwise = x
-    min_component = 
-      if (length components) == 1
-        then []
-        else foldr1 minList components
+    filled = filledComponents b
+    capChoices = map (concat) $ List.subsequences filled
+    new_board = foldr (\c -> \b' -> removeMarble c b') b (concat filled)
     fold_remove cd (ZertzState s1 s2 b' p) =
-      let color = getHex cd b
-          new_board = removeMarble cd b' in
+      let color = getHex cd b in
         case (color, p) of
           (Open, _) -> ZertzState s1 s2 new_board p
           (_, 1)    -> ZertzState (scoreMarble s1 color) s2 new_board p
           (_, (-1)) -> ZertzState s1 (scoreMarble s2 color) new_board p
 
-boardComponents :: ZertzBoard -> [[Coord]]
-boardComponents b =
-  map Graph.flattenSCC $ Graph.stronglyConnComp graph_list
+filledComponents :: ZertzBoard -> [[Coord]]
+filledComponents b =
+  filled_comps
   where
-    not_empty = Map.keys $ Map.filter (/= Empty) b
-    neighbors x = filter (hexOpen b) $ map (\f -> f x)
+    not_empty = Set.fromList $ Map.keys $ Map.filter (/= Empty) b
+    neighbors x = filter (flip Set.member not_empty) $ map (\f -> f x)
                     [neHex, eHex, seHex, swHex, wHex, nwHex]
-    graph_list = map (\x -> (x, x, neighbors x)) not_empty
+    graph_list = map (\x -> (x, x, neighbors x)) $ Set.toList not_empty
+    components = map Graph.flattenSCC $ Graph.stronglyConnComp graph_list
+    filled_comps = filter (foldr (&&) True . map (hexOccupied b)) components
