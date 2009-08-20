@@ -85,7 +85,7 @@ generatePlacements s@(ZertzState s1 s2 b p) = do
     coord <- openHexes
     remCoord <- filter (removable s) openHexes
     guard $ coord /= remCoord
-    eliminateFilledComponents $ 
+    return $ eliminateFilledComponents $ 
       ZertzState s1 s2 (removeMarble remCoord (placeMarble coord color b)) p
   where
     openHexes = Map.keys $ Map.filter (== Open) b
@@ -107,13 +107,12 @@ removable (ZertzState _ _ b _) c =
     empties = map (\x -> (getHex x b) == Empty) $ map ($ c) hexList
     numEmpties = length $ filter (id) $ take 6 empties
 
-eliminateFilledComponents :: ZertzState -> [ZertzState]
+eliminateFilledComponents :: ZertzState -> ZertzState
 eliminateFilledComponents s@(ZertzState _ _ b _) =
-  map (foldr (fold_remove) s) capChoices
+  foldr (fold_remove) s filled
   where
     filled = filledComponents b
-    capChoices = map (concat) $ List.subsequences filled
-    new_board = foldr (\c -> \b' -> removeMarble c b') b (concat filled)
+    new_board = foldr (\c -> \b' -> removeMarble c b') b filled
     fold_remove cd (ZertzState s1 s2 b' p) =
       let color = getHex cd b in
         case (color, p) of
@@ -121,9 +120,9 @@ eliminateFilledComponents s@(ZertzState _ _ b _) =
           (_, 1)    -> ZertzState (scoreMarble s1 color) s2 new_board p
           (_, (-1)) -> ZertzState s1 (scoreMarble s2 color) new_board p
 
-filledComponents :: ZertzBoard -> [[Coord]]
+filledComponents :: ZertzBoard -> [Coord]
 filledComponents b =
-  filled_comps
+  concat filled_comps
   where
     not_empty = Set.fromList $ Map.keys $ Map.filter (/= Empty) b
     neighbors x = filter (flip Set.member not_empty) $ map (\f -> f x)
