@@ -32,11 +32,11 @@ getHex = Map.findWithDefault Empty
 -- blankBoard - The default board with no marbles
 blankBoard :: ZertzBoard
 blankBoard = Map.fromList $ map (\x -> (x, Open))
-               [      (4,0),(4,1),(4,2),
-                   (3,0),(3,1),(3,2),(3,3),
-                (2,0),(2,1),(2,2),(2,3),(2,4),
-                   (1,1),(1,2),(1,3),(1,4),
-                      (0,2),(0,3),(0,4)       ]
+               [(2, (-2)),  (2, (-1)),  (2, 0),
+                (1, (-2)),  (1, (-1)),  (1, 0),  (1, 1),
+                (0, (-2)),  (0, (-1)),  (0, 0),  (0, 1),  (0, 2),
+                ((-1), (-1)),  ((-1), 0),  ((-1), 1),  ((-1), 2),
+                ((-2), 0),  ((-2), 1),  ((-2), 2)       ]
 
 startState :: ZertzState
 startState = ZertzState (0,0,0) (0,0,0) blankBoard (-1)
@@ -44,17 +44,17 @@ startState = ZertzState (0,0,0) (0,0,0) blankBoard (-1)
 -- *Hex - Generate to the coordinate pair in the given direction from the
 -- given coordinate pair.
 nwHex :: Coord -> Coord
-nwHex (x, y) = (x+1, y-1)
+nwHex (x, y) = (x-1, y+1)
 neHex :: Coord -> Coord
-neHex (x, y) = (x+1, y)
+neHex (x, y) = (x, y+1)
 eHex :: Coord -> Coord
-eHex (x, y) = (x, y+1)
+eHex (x, y) = (x+1, y)
 seHex :: Coord -> Coord
-seHex (x, y) = (x-1, y+1)
+seHex (x, y) = (x+1, y-1)
 swHex :: Coord -> Coord
-swHex (x, y) = (x-1, y)
+swHex (x, y) = (x, y-1)
 wHex :: Coord -> Coord
-wHex (x, y) = (x, y-1)
+wHex (x, y) = (x-1, y)
 
 hexOccupied :: ZertzBoard -> Coord -> Bool
 hexOccupied board coords =

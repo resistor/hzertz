@@ -3,27 +3,27 @@ module Callbacks (registerCallbacks) where
 import Graphics.Rendering.OpenGL
 import Graphics.UI.GLUT
 
-import Data.IORef ( IORef, newIORef )
+import Data.IORef ( IORef, newIORef, readIORef )
 
-import qualified Geometry as Geometry
+import qualified Render as Render
 import qualified Zertz as Zertz
+import qualified Data.Map as Map
 
 registerCallbacks :: IO ()
 registerCallbacks = do
-  gameState <- newIORef Zertz.startState
-  keyboardMouseCallback $= Just (keyboardMouse gameState)
-  displayCallback $= display gameState
+  gameStateRef <- newIORef $ Zertz.ZertzState (0,0,0) (0,0,0) (Map.fromList [((-2,0),Zertz.Gray),((-2,1),Zertz.White),((-2,2),Zertz.Black),((-1,-1),Zertz.Open),((-1,0),Zertz.Open),((-1,1),Zertz.Open),((-1,2),Zertz.Open),((0,-2),Zertz.Open),((0,-1),Zertz.Open),((0,0),Zertz.Open),((0,1),Zertz.Open),((0,2),Zertz.Open),((1,-2),Zertz.Open),((1,-1),Zertz.Open),((1,0),Zertz.Open),((1,1),Zertz.Open),((2,-2),Zertz.Open),((2,-1),Zertz.Open),((2,0),Zertz.Open)]) (-1)
+  keyboardMouseCallback $= Just (keyboardMouse gameStateRef)
+  displayCallback $= display gameStateRef
   reshapeCallback $= Just reshape
 
 keyboardMouse :: IORef Zertz.ZertzState -> KeyboardMouseCallback
-keyboardMouse gameState key state modifiers position = do
+keyboardMouse gameStateRef key state modifiers position = do
   return ()
 
 display :: IORef Zertz.ZertzState -> DisplayCallback
-display gameState = do
-  clear [ColorBuffer]
-  lineWidth $= 3.0
-  Geometry.renderFilledCircle
+display gameStateRef = do
+  Zertz.ZertzState firstScore secondScore board turn <- readIORef gameStateRef
+  Render.renderZertzBoard board
   swapBuffers
   
 reshape :: ReshapeCallback
