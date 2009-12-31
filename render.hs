@@ -1,4 +1,4 @@
-module Render (renderZertzBoard, renderHollowHexagon, renderFilledCircle) where
+module Render (renderZertzBoard) where
 
 import Graphics.Rendering.OpenGL
 
@@ -16,7 +16,7 @@ renderZertzHex (_, Zertz.Empty) = return ()
 renderZertzHex ((x, y), state) = do
   color $ Color3 (1.0::GLfloat) (1.0::GLfloat) (1.0::GLfloat) 
   scale scaleFrac scaleFrac scaleFrac
-  translate $ (Vector3 (renderX + (renderY / 2.0)) renderY 0.0)
+  translate $ (Vector3 (renderX + (renderY / 2.0)) ((sqrt 3.0) * renderY / 2.0) 0.0)
   renderHollowHexagon
   
   scale (0.75::GLfloat) (0.75::GLfloat) (0.75::GLfloat)
