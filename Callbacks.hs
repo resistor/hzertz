@@ -25,13 +25,13 @@ keyboardMouse _ mouseStateRef (MouseButton LeftButton) Up _ cur_pos = do
   mouseState <- readIORef mouseStateRef
   mouseStateRef $= Nothing
   case mouseState of
-    Just old_pos | distance old_pos cur_pos < 25 ->
+    Just old_pos | distance2 old_pos cur_pos < 25 ->
       print cur_pos
     _ ->
       return ()
   where
-    distance :: Position -> Position -> GLint
-    distance (Position x1 y1) (Position x2 y2) =
+    distance2 :: Position -> Position -> GLint
+    distance2 (Position x1 y1) (Position x2 y2) =
       (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
     
 keyboardMouse _ _ _ _ _ _ = do
