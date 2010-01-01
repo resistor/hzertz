@@ -17,22 +17,35 @@ registerCallbacks = do
   displayCallback $= display gameStateRef
   reshapeCallback $= Just reshape
 
+mouseClick :: IORef Zertz.ZertzState -> (GLfloat, GLfloat) -> IO ()
+mouseClick gameStateRef (clickX, clickY) = do
+  print (clickX, clickY)
+
 keyboardMouse :: IORef Zertz.ZertzState -> IORef (Maybe Position) -> KeyboardMouseCallback
 -- keyboardMouse gameStateRef mouseStateRef key state modifiers position
 keyboardMouse _ mouseStateRef (MouseButton LeftButton) Down _ position = do
   mouseStateRef $= Just position
-keyboardMouse _ mouseStateRef (MouseButton LeftButton) Up _ cur_pos = do
+keyboardMouse gameStateRef mouseStateRef (MouseButton LeftButton) Up _ cur_pos@(Position mouse_x mouse_y) = do
   mouseState <- readIORef mouseStateRef
   mouseStateRef $= Nothing
   case mouseState of
-    Just old_pos | distance2 old_pos cur_pos < 25 ->
-      print cur_pos
+    Just old_pos | distance2 old_pos cur_pos < 25 -> do
+      Size window_x window_y <- get windowSize
+      mouseClick gameStateRef $ localCoords (mouse_x, mouse_y) (window_x, window_y)
     _ ->
       return ()
   where
     distance2 :: Position -> Position -> GLint
     distance2 (Position x1 y1) (Position x2 y2) =
       (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
+    
+    localCoords :: (Integral a, Integral b, Fractional c) => (a, a) -> (b, b) -> (c, c)
+    localCoords (mouse_x, mouse_y) (window_x, window_y) =
+      (((fromIntegral mouse_x) - scaled_x) / scaled_x,
+       negate $ ((fromIntegral mouse_y) - scaled_y) / scaled_y)
+      where
+        scaled_x = (fromIntegral window_x) / 2.0
+        scaled_y = (fromIntegral window_y) / 2.0
     
 keyboardMouse _ _ _ _ _ _ = do
   return ()
