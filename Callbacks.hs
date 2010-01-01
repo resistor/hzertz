@@ -20,6 +20,7 @@ registerCallbacks = do
 mouseClick :: IORef Zertz.ZertzState -> (GLfloat, GLfloat) -> IO ()
 mouseClick gameStateRef (clickX, clickY) = do
   print (clickX, clickY)
+  postRedisplay Nothing
 
 keyboardMouse :: IORef Zertz.ZertzState -> IORef (Maybe Position) -> KeyboardMouseCallback
 -- keyboardMouse gameStateRef mouseStateRef key state modifiers position
