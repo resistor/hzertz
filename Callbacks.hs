@@ -25,7 +25,9 @@ keyboardMouse :: IORef Zertz.ZertzState -> IORef (Maybe Position) -> KeyboardMou
 -- keyboardMouse gameStateRef mouseStateRef key state modifiers position
 keyboardMouse _ mouseStateRef (MouseButton LeftButton) Down _ position = do
   mouseStateRef $= Just position
-keyboardMouse gameStateRef mouseStateRef (MouseButton LeftButton) Up _ cur_pos@(Position mouse_x mouse_y) = do
+keyboardMouse gameStateRef mouseStateRef (MouseButton LeftButton) Up
+              (Modifiers  {shift= Up, ctrl = Up, alt = Up})
+              cur_pos@(Position mouse_x mouse_y) = do
   mouseState <- readIORef mouseStateRef
   mouseStateRef $= Nothing
   case mouseState of
@@ -46,7 +48,8 @@ keyboardMouse gameStateRef mouseStateRef (MouseButton LeftButton) Up _ cur_pos@(
       where
         scaled_x = (fromIntegral window_x) / 2.0
         scaled_y = (fromIntegral window_y) / 2.0
-    
+keyboardMouse _ mouseStateRef (MouseButton LeftButton) Up _ _ = do
+  mouseStateRef $= Nothing
 keyboardMouse _ _ _ _ _ _ = do
   return ()
 
