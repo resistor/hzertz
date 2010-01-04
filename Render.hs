@@ -8,7 +8,7 @@ import qualified Zertz as Zertz
 renderZertzBoard :: Zertz.ZertzBoard -> IO ()
 renderZertzBoard board = do
   clear [ColorBuffer]
-  lineWidth $= 3.0
+  lineWidth $= 2.0
   mapM_ (preservingMatrix . renderZertzHex) $ Map.toList board
   
 renderZertzHex :: (Zertz.Coord, Zertz.HexState) -> IO ()
@@ -16,9 +16,10 @@ renderZertzHex (_, Zertz.Empty) = return ()
 renderZertzHex ((x, y), state) = do
   color $ Color3 (1.0::GLfloat) (1.0::GLfloat) (1.0::GLfloat) 
   scale scaleFrac scaleFrac scaleFrac
-  translate $ (Vector3 (renderX + (renderY / 2.0)) ((sqrt 3.0) * renderY / 2.0) 0.0)
-  renderHollowHexagon
-  
+  translate $ (Vector3 (renderX + (renderY / 2.0)) ((sqrt 3.0) * renderY / 2.0) 0.0);
+	lineWidth $= 2.0;
+	renderHollowHexagon;
+	lineWidth $= 1.0;
   scale (0.75::GLfloat) (0.75::GLfloat) (0.75::GLfloat)
   case state of
     Zertz.White ->
@@ -26,7 +27,7 @@ renderZertzHex ((x, y), state) = do
     Zertz.Gray ->
       color $ Color3 (0.6::GLfloat) (0.6::GLfloat) (0.6::GLfloat) 
     Zertz.Black ->
-      color $ Color3 (0.2::GLfloat) (0.2::GLfloat) (0.2::GLfloat)
+      color $ Color3 (0.3::GLfloat) (0.3::GLfloat) (0.3::GLfloat)
     Zertz.Open ->
       color $ Color3 (0.0::GLfloat) (0.0::GLfloat) (0.0::GLfloat)
   renderFilledCircle

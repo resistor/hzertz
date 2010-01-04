@@ -26,8 +26,13 @@ unprojectCurrentMatrices window_point= do
 
 mouseClick :: IORef Zertz.ZertzState -> (GLdouble, GLdouble) -> IO ()
 mouseClick gameStateRef (clickX, clickY) = do
-  print (clickX, clickY)
+  print $ (grid_x, grid_y)
   postRedisplay Nothing
+  where
+    trans_x = (-1.0) * (sqrt 3.0) / 3.0
+    trans_y = (-2.0) * (sqrt 3.0) / 3.0
+    grid_x = round $ 3 * (clickX + clickY * trans_x)
+    grid_y = round $ 3 * (clickY * trans_y)
 
 keyboardMouse :: IORef Zertz.ZertzState -> IORef (Maybe Position) -> KeyboardMouseCallback
 keyboardMouse _ mouseStateRef (MouseButton LeftButton) Down
